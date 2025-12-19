@@ -56,7 +56,7 @@ def extract_bundesland(tweet):
 
 
 def main():
-    # Pfade
+    # An eigene Pfade anpassen!
     model_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\LDA\final_14_topics"
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\corona_stopwords.txt"
@@ -326,3 +326,4 @@ def create_grouped_bar_chart(df_results, output_dir, timestamp):
 if __name__ == '__main__':
 
     main()
+
