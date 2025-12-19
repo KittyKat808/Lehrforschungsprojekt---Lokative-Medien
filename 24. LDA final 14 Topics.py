@@ -118,7 +118,7 @@ def main():
     # Timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # HAUPTTABELLE FÜR DIE ARBEIT (mit Top 7 Wörtern)
+    # HAUPTTABELLE Top 7 Wörtern
     print("\nErstelle Haupttabelle für wissenschaftliche Arbeit...")
 
     main_table_data = []
@@ -253,21 +253,17 @@ def main():
 
     # ZUSAMMENFASSUNG
     print("\n" + "=" * 70)
-    print("✅ ANALYSE ABGESCHLOSSEN!")
+    print("ANALYSE ABGESCHLOSSEN!")
     print("=" * 70)
-    print(f"\n📁 Alle Dateien gespeichert in: {output_dir}\n")
+    print(f"Alle Dateien gespeichert in: {output_dir}\n")
     print("Erstellte Dateien:")
     print(f"  • HAUPTTABELLE (für Arbeit): {os.path.basename(main_excel)}")
     print(f"  • ANHANG-TABELLE (komplett): {os.path.basename(appendix_excel)}")
     print(f"  • Dokumentation: {os.path.basename(txt_file)}")
     print(f"  • Gespeichertes Modell: {os.path.basename(model_file)}")
-    print("\n💡 Nächste Schritte:")
-    print("   1. Öffne die Haupttabelle in Excel")
-    print("   2. Fülle die Spalte 'Thematisches Label' mit deinen Interpretationen")
-    print("   3. Kopiere die Tabelle in deine Word-Arbeit")
-    print("   4. Die Anhang-Tabelle kommt in den Anhang (optional)")
 
 
 if __name__ == '__main__':
 
     main()
+
