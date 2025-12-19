@@ -87,6 +87,7 @@ def find_corona_related_tokens(tweets, output_dir):
 
 
 def main():
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Tokens"
 
@@ -96,3 +97,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
