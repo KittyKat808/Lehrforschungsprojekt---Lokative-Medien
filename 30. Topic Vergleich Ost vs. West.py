@@ -202,22 +202,11 @@ def main():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # CSV speichern
-    csv_file = os.path.join(output_dir, f'ost_west_vergleich_{timestamp}.csv')
-    df_results.to_csv(csv_file, index=False, encoding='utf-8-sig')
-    print(f"✓ CSV gespeichert: {csv_file}")
-
     # TXT-Report
     create_txt_report(df_results, ost_total, west_total, output_dir, timestamp)
 
     # Grouped Bar Chart
     create_grouped_bar_chart(df_results, output_dir, timestamp)
-
-    print("\n" + "=" * 70)
-    print("✅ ANALYSE ABGESCHLOSSEN")
-    print("=" * 70)
-    print(f"\n📁 Dateien in: {output_dir}")
-    print("📊 Erstellt: 1 CSV, 1 TXT-Report, 1 Grouped Bar Chart")
 
 
 def create_txt_report(df_results, ost_total, west_total, output_dir, timestamp):
@@ -335,4 +324,5 @@ def create_grouped_bar_chart(df_results, output_dir, timestamp):
 
 
 if __name__ == '__main__':
+
     main()
