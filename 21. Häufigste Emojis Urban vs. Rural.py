@@ -14,7 +14,6 @@ EMOJI_MODIFIERS = {
 
 # Urban/Rural Klassifizierung
 CITY_CLASSIFICATION = {
-    # Urban (>= 1500 E/km²)
     'Berlin': 'urban',
     'Hamburg': 'urban',
     'München': 'urban',
@@ -288,7 +287,7 @@ def visualize_urban_rural_emojis(tweets, output_dir):
         title='Top 10 Emojis: Urban vs. Rural (Direktvergleich)',
         xaxis=dict(
             title='Emoji',
-            tickfont=dict(size=24)  # WICHTIG: Große Emojis auf X-Achse!
+            tickfont=dict(size=24)  # Große Emojis auf X-Achse!
         ),
         yaxis=dict(
             title='Anzahl Verwendungen'
@@ -422,6 +421,7 @@ def visualize_urban_rural_emojis(tweets, output_dir):
 
 
 def main():
+    # eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Emojis"
 
@@ -430,4 +430,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
