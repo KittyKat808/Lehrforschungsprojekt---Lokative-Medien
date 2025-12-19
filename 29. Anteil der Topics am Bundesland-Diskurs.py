@@ -212,10 +212,9 @@ def main():
                 output_dir, timestamp)
 
     print("\n" + "=" * 70)
-    print("✅ ANALYSE ABGESCHLOSSEN")
+    print("ANALYSE ABGESCHLOSSEN")
     print("=" * 70)
-    print(f"\n📁 Dateien in: {output_dir}")
-    print("📊 Erstellt: 1 TXT-Report, 1 Grafik mit 6 Karten")
+    print(f"\nDateien in: {output_dir}")
 
 
 def create_txt_report(topic_dataframes, SELECTED_TOPICS, TOPIC_DISPLAY,
@@ -324,4 +323,5 @@ def create_maps(germany_gdf, topic_dataframes, SELECTED_TOPICS, TOPIC_DISPLAY,
 
 
 if __name__ == '__main__':
+
     main()
