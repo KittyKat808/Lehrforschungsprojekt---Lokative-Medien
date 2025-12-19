@@ -405,6 +405,7 @@ def create_visualizations(germany_gdf, df, output_dir, timestamp):
 
 
 def main():
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Anzahl und Verteilung"
 
@@ -419,4 +420,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
