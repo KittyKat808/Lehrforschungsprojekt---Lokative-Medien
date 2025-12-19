@@ -265,6 +265,7 @@ def create_temporal_analysis(tweets, output_dir):
 
 
 def main():
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     output_dir = r"C:\Users\k[NUTZERNAME]\[ORDNERNAME]\Zeitliche Analyse"
 
@@ -274,9 +275,8 @@ def main():
     print("\n" + "=" * 60)
     print("ZEITLICHE ANALYSE ABGESCHLOSSEN!")
     print("=" * 60)
-    print(f"Interaktive HTML-Datei und 1 TXT-Report erstellt.")
-    print(f"Öffne sie im Browser: {output_dir}\n")
 
 
 if __name__ == "__main__":
     main()
+
