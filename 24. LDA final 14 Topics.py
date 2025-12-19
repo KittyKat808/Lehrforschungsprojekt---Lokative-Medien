@@ -9,10 +9,10 @@ from datetime import datetime
 
 def main():
     # Pfade
-    input_file = r"C:\Users\katri\Desktop\LFP Datenanalyse 2025\03 Data Cleaning\Cleaned_Data.jsonl"
-    stopwords_file = r"C:\Users\katri\Desktop\LFP Datenanalyse 2025\05 Topic Modelling\corona_stopwords.txt"
-    spacy_stopwords_file = r"C:\Users\katri\Desktop\LFP Datenanalyse 2025\05 Topic Modelling\spacy_stopwords_deutsch.txt"
-    output_dir = r"C:\Users\katri\Desktop\LFP Datenanalyse 2025\05 Topic Modelling\LDA\final_14_topics"
+    input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
+    stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\corona_stopwords.txt"
+    spacy_stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\spacy_stopwords_deutsch.txt"
+    output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\LDA\final_14_topics"
 
     # Output-Ordner erstellen
     os.makedirs(output_dir, exist_ok=True)
@@ -269,4 +269,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
