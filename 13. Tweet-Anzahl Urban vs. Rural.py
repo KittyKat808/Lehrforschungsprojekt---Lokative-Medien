@@ -1,133 +1,144 @@
 import json
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from collections import Counter
 import os
 from datetime import datetime
 
-# Matplotlib auf Deutsch
-plt.rcParams['font.family'] = 'DejaVu Sans'
-plt.rcParams['axes.unicode_minus'] = False
-
-# Großstädte-Mapping (Englisch → Deutsch)
-GROSSSTAEDTE_MAPPING = {
-    # Englischer Name (Twitter) : Deutscher Name
-    "Berlin": "Berlin",
-    "Hamburg": "Hamburg",
-    "Munich": "München",
-    "Cologne": "Köln",
-    "Frankfurt": "Frankfurt am Main",
-    "Frankfurt am Main": "Frankfurt am Main",
-    "Dusseldorf": "Düsseldorf",
-    "Düsseldorf": "Düsseldorf",
-    "Stuttgart": "Stuttgart",
-    "Leipzig": "Leipzig",
-    "Dortmund": "Dortmund",
-    "Bremen": "Bremen",
-    "Essen": "Essen",
-    "Dresden": "Dresden",
-    "Nuremberg": "Nürnberg",
-    "Nürnberg": "Nürnberg",
-    "Hanover": "Hannover",
-    "Hannover": "Hannover",
-    "Duisburg": "Duisburg",
-    "Bochum": "Bochum",
-    "Wuppertal": "Wuppertal",
-    "Bielefeld": "Bielefeld",
-    "Bonn": "Bonn",
-    "Mannheim": "Mannheim",
-    "Karlsruhe": "Karlsruhe",
-    "Munster": "Münster",
-    "Münster": "Münster",
-    "Augsburg": "Augsburg",
-    "Wiesbaden": "Wiesbaden",
-    "Gelsenkirchen": "Gelsenkirchen",
-    "Monchengladbach": "Mönchengladbach",
-    "Mönchengladbach": "Mönchengladbach",
-    "Aachen": "Aachen",
-    "Brunswick": "Braunschweig",
-    "Braunschweig": "Braunschweig",
-    "Kiel": "Kiel",
-    "Chemnitz": "Chemnitz",
-    "Magdeburg": "Magdeburg",
-    "Freiburg": "Freiburg im Breisgau",
-    "Freiburg im Breisgau": "Freiburg im Breisgau",
-    "Krefeld": "Krefeld",
-    "Halle": "Halle (Saale)",
-    "Halle (Saale)": "Halle (Saale)",
-    "Mainz": "Mainz",
-    "Erfurt": "Erfurt",
-    "Lubeck": "Lübeck",
-    "Lübeck": "Lübeck",
-    "Oberhausen": "Oberhausen",
-    "Rostock": "Rostock",
-    "Kassel": "Kassel",
-    "Hagen": "Hagen",
-    "Potsdam": "Potsdam",
-    "Saarbrucken": "Saarbrücken",
-    "Saarbrücken": "Saarbrücken",
-    "Hamm": "Hamm",
-    "Ludwigshafen": "Ludwigshafen am Rhein",
-    "Ludwigshafen am Rhein": "Ludwigshafen am Rhein",
-    "Oldenburg": "Oldenburg",
-    "Mulheim": "Mülheim an der Ruhr",
-    "Mülheim": "Mülheim an der Ruhr",
-    "Mülheim an der Ruhr": "Mülheim an der Ruhr",
-    "Leverkusen": "Leverkusen",
-    "Darmstadt": "Darmstadt",
-    "Osnabruck": "Osnabrück",
-    "Osnabrück": "Osnabrück",
-    "Solingen": "Solingen",
-    "Paderborn": "Paderborn",
-    "Herne": "Herne",
-    "Heidelberg": "Heidelberg",
-    "Neuss": "Neuss",
-    "Regensburg": "Regensburg",
-    "Ingolstadt": "Ingolstadt",
-    "Pforzheim": "Pforzheim",
-    "Wurzburg": "Würzburg",
-    "Würzburg": "Würzburg",
-    "Offenbach": "Offenbach am Main",
-    "Offenbach am Main": "Offenbach am Main",
-    "Furth": "Fürth",
-    "Fürth": "Fürth",
-    "Heilbronn": "Heilbronn",
-    "Ulm": "Ulm",
-    "Wolfsburg": "Wolfsburg",
-    "Gottingen": "Göttingen",
-    "Göttingen": "Göttingen",
-    "Reutlingen": "Reutlingen",
-    "Bremerhaven": "Bremerhaven",
-    "Bottrop": "Bottrop",
-    "Erlangen": "Erlangen",
-    "Recklinghausen": "Recklinghausen",
-    "Remscheid": "Remscheid",
-    "Koblenz": "Koblenz",
-    "Bergisch Gladbach": "Bergisch Gladbach",
-    "Jena": "Jena",
-    "Salzgitter": "Salzgitter",
-    "Trier": "Trier",
-    "Siegen": "Siegen",
-    "Moers": "Moers",
-    "Gutersloh": "Gütersloh",
-    "Gütersloh": "Gütersloh",
+# Emoji-Modifier, die gefiltert werden sollen
+EMOJI_MODIFIERS = {
+    '🏻', '🏼', '🏽', '🏾', '🏿',
+    '♂', '♀', '⚧',
+    '️', '\ufe0f',
 }
 
-# Nur englische Namen als Set (für schnelles Lookup)
-GROSSSTAEDTE_ENGLISCH = set(GROSSSTAEDTE_MAPPING.keys())
+# Urban/Rural Klassifizierung
+CITY_CLASSIFICATION = {
+    # Urban (>= 100.000 Einwohner - Großstädte)
+    'Berlin': 'urban',
+    'Hamburg': 'urban',
+    'Munich': 'urban',
+    'München': 'urban',
+    'Cologne': 'urban',
+    'Köln': 'urban',
+    'Frankfurt': 'urban',
+    'Frankfurt am Main': 'urban',
+    'Stuttgart': 'urban',
+    'Düsseldorf': 'urban',
+    'Dusseldorf': 'urban',
+    'Dortmund': 'urban',
+    'Essen': 'urban',
+    'Leipzig': 'urban',
+    'Bremen': 'urban',
+    'Dresden': 'urban',
+    'Hannover': 'urban',
+    'Hanover': 'urban',
+    'Nürnberg': 'urban',
+    'Nuremberg': 'urban',
+    'Duisburg': 'urban',
+    'Bochum': 'urban',
+    'Wuppertal': 'urban',
+    'Bielefeld': 'urban',
+    'Bonn': 'urban',
+    'Münster': 'urban',
+    'Munster': 'urban',
+    'Karlsruhe': 'urban',
+    'Mannheim': 'urban',
+    'Augsburg': 'urban',
+    'Wiesbaden': 'urban',
+    'Gelsenkirchen': 'urban',
+    'Mönchengladbach': 'urban',
+    'Monchengladbach': 'urban',
+    'Braunschweig': 'urban',
+    'Brunswick': 'urban',
+    'Chemnitz': 'urban',
+    'Kiel': 'urban',
+    'Aachen': 'urban',
+    'Halle': 'urban',
+    'Halle (Saale)': 'urban',
+    'Magdeburg': 'urban',
+    'Freiburg': 'urban',
+    'Freiburg im Breisgau': 'urban',
+    'Krefeld': 'urban',
+    'Lübeck': 'urban',
+    'Lubeck': 'urban',
+    'Oberhausen': 'urban',
+    'Erfurt': 'urban',
+    'Mainz': 'urban',
+    'Rostock': 'urban',
+    'Kassel': 'urban',
+    'Hagen': 'urban',
+    'Saarbrücken': 'urban',
+    'Saarbrucken': 'urban',
+    'Mülheim': 'urban',
+    'Mulheim': 'urban',
+    'Mülheim an der Ruhr': 'urban',
+    'Potsdam': 'urban',
+    'Ludwigshafen': 'urban',
+    'Ludwigshafen am Rhein': 'urban',
+    'Oldenburg': 'urban',
+    'Leverkusen': 'urban',
+    'Osnabrück': 'urban',
+    'Osnabruck': 'urban',
+    'Solingen': 'urban',
+    'Heidelberg': 'urban',
+    'Herne': 'urban',
+    'Neuss': 'urban',
+    'Darmstadt': 'urban',
+    'Paderborn': 'urban',
+    'Regensburg': 'urban',
+    'Ingolstadt': 'urban',
+    'Würzburg': 'urban',
+    'Wurzburg': 'urban',
+    'Fürth': 'urban',
+    'Furth': 'urban',
+    'Wolfsburg': 'urban',
+    'Offenbach': 'urban',
+    'Offenbach am Main': 'urban',
+    'Ulm': 'urban',
+    'Heilbronn': 'urban',
+    'Pforzheim': 'urban',
+    'Göttingen': 'urban',
+    'Gottingen': 'urban',
+    'Bottrop': 'urban',
+    'Trier': 'urban',
+    'Recklinghausen': 'urban',
+    'Reutlingen': 'urban',
+    'Bremerhaven': 'urban',
+    'Koblenz': 'urban',
+    'Bergisch Gladbach': 'urban',
+    'Jena': 'urban',
+    'Remscheid': 'urban',
+    'Erlangen': 'urban',
+    'Moers': 'urban',
+    'Siegen': 'urban',
+    'Hildesheim': 'urban',
+    'Salzgitter': 'urban',
+    'Gütersloh': 'urban',
+    'Gutersloh': 'urban',
+}
 
-# Stadtstaaten (alle möglichen Schreibweisen)
-STADTSTAATEN = ['Berlin', 'Hamburg', 'Bremen', 'Free Hanseatic City of Bremen', 'Hanseatic City']
 
-# Einwohnerzahlen Deutschland gesamt (Stand 31.12.2020)
-EINWOHNER_DEUTSCHLAND = 83_200_000
+def filter_emoji_modifiers(emojis):
+    """Filtert Emoji-Modifier aus einer Liste von Emojis"""
+    return [emoji for emoji in emojis if emoji not in EMOJI_MODIFIERS]
 
-# Einwohnerzahlen Urban/Rural (Quelle: Destatis 2021b)
-# "Ende 2020 lebten knapp 24,5 Millionen Menschen in kreisfreien Großstädten
-# ab 100 000 Einwohnerinnen und Einwohnern. Das waren rund 29,4 % der Gesamtbevölkerung."
-EINWOHNER_URBAN = 24_500_000  # Kreisfreie Großstädte ab 100.000 EW
-EINWOHNER_RURAL = 58_700_000  # Rest (gerundet)
+
+def classify_location(tweet):
+    """Klassifiziert Tweet als urban oder rural basierend auf Stadt"""
+    city = None
+
+    geo_source = tweet.get('geo_source')
+
+    if geo_source == 'coordinates' and tweet.get('geo'):
+        city = tweet['geo'].get('city')
+    elif geo_source == 'place' and tweet.get('place'):
+        city = tweet['place'].get('city')
+
+    if not city:
+        return None
+
+    return CITY_CLASSIFICATION.get(city, 'rural')
 
 
 def load_tweets(input_file):
@@ -149,296 +160,296 @@ def load_tweets(input_file):
     return tweets
 
 
-def kategorisiere_tweet_urban_rural(tweet):
-    """
-    Kategorisiert Tweet als Urban (Großstadt >100k) oder Rural
+def visualize_urban_rural_emojis(tweets, output_dir):
+    """Erstellt Visualisierungen für Urban vs. Rural Emojis"""
 
-    Logik:
-    1. Stadtstaaten (Berlin, Hamburg, Bremen) → Urban
-    2. Wenn city vorhanden → prüfe ob Großstadt
-    3. Wenn nur county → behandle wie city und prüfe ob Großstadt
+    print("Analysiere Emojis nach Urban/Rural...")
 
-    Returns:
-        'Urban', 'Rural', oder 'Unknown'
-    """
-    geo_source = tweet.get('geo_source')
+    # Datenstrukturen
+    urban_emojis = []
+    rural_emojis = []
 
-    if not geo_source:
-        return 'Unknown'
+    urban_tweets = 0
+    rural_tweets = 0
+    tweets_with_emojis = 0
+    filtered_modifiers = 0
 
-    # Hole die richtigen Geodaten je nach Quelle
-    if geo_source == 'place' and tweet.get('place'):
-        location_data = tweet['place']
-    elif geo_source == 'coordinates' and tweet.get('geo'):
-        location_data = tweet['geo']
-    else:
-        return 'Unknown'
-
-    # Stadtstaaten sind immer Urban
-    # (verschiedene Schreibweisen: "Hamburg", "Free Hanseatic City of Bremen", etc.)
-    state = location_data.get('state', '')
-    if any(stadtstaat in state for stadtstaat in STADTSTAATEN):
-        return 'Urban'
-
-    # Bestimme den zu prüfenden Ortsnamen (Priorität: city > county)
-    ort = None
-    if 'city' in location_data and location_data['city']:
-        ort = location_data['city']
-    elif 'county' in location_data and location_data['county']:
-        ort = location_data['county']
-
-    if not ort:
-        return 'Unknown'
-
-    # Bereinige Ortsnamen
-    ort_clean = ort.replace("Region ", "").replace("City of ", "").strip()
-
-    # Prüfe ob Großstadt
-    if ort_clean in GROSSSTAEDTE_ENGLISCH:
-        return 'Urban'
-    else:
-        return 'Rural'
-
-
-def get_city_or_county(tweet):
-    """Extrahiert city oder county aus Tweet für Statistiken"""
-    geo_source = tweet.get('geo_source')
-
-    if geo_source == 'place' and tweet.get('place'):
-        loc = tweet['place']
-    elif geo_source == 'coordinates' and tweet.get('geo'):
-        loc = tweet['geo']
-    else:
-        return 'Unknown'
-
-    # Priorität: city > county > state (für Stadtstaaten)
-    city = loc.get('city')
-    if city:
-        return city
-
-    county = loc.get('county')
-    if county:
-        return county.replace("Region ", "").replace("City of ", "").strip()
-
-    # Für Stadtstaaten: Extrahiere Namen aus state
-    state = loc.get('state', '')
-    for stadtstaat in ['Berlin', 'Hamburg', 'Bremen']:
-        if stadtstaat in state:
-            return stadtstaat
-
-    return 'Unknown'
-
-
-def create_urban_rural_analysis(tweets, output_dir):
-    """Erstellt Urban/Rural-Analyse"""
-
-    print("Erstelle Urban/Rural-Analyse...")
-
-    # Kategorisiere alle Tweets
-    kategorien = []
     for tweet in tweets:
-        kategorie = kategorisiere_tweet_urban_rural(tweet)
-        kategorien.append(kategorie)
+        emojis = tweet.get('entities', {}).get('emojis', [])
 
-    # Zähle
-    kategorie_counts = Counter(kategorien)
+        if not emojis:
+            continue
 
-    urban_count = kategorie_counts.get('Urban', 0)
-    rural_count = kategorie_counts.get('Rural', 0)
-    unknown_count = kategorie_counts.get('Unknown', 0)
+        # Modifier filtern
+        original_count = len(emojis)
+        emojis = filter_emoji_modifiers(emojis)
+        filtered_modifiers += (original_count - len(emojis))
 
-    total_classified = urban_count + rural_count
+        if not emojis:
+            continue
 
-    print(f"\nUrban: {urban_count} ({urban_count / len(tweets) * 100:.1f}%)")
-    print(f"Rural: {rural_count} ({rural_count / len(tweets) * 100:.1f}%)")
-    print(f"Unknown: {unknown_count} ({unknown_count / len(tweets) * 100:.1f}%)")
+        tweets_with_emojis += 1
 
-    # Pro-Kopf-Berechnung
-    urban_pro_100k = (urban_count / EINWOHNER_URBAN) * 100000 if urban_count > 0 else 0
-    rural_pro_100k = (rural_count / EINWOHNER_RURAL) * 100000 if rural_count > 0 else 0
+        # Klassifizierung
+        classification = classify_location(tweet)
 
-    # DataFrame erstellen
-    data = {
-        'Kategorie': ['Urban', 'Rural'],
-        'Tweets_absolut': [urban_count, rural_count],
-        'Anteil_Prozent': [urban_count / total_classified * 100 if total_classified > 0 else 0,
-                           rural_count / total_classified * 100 if total_classified > 0 else 0],
-        'Einwohner': [EINWOHNER_URBAN, EINWOHNER_RURAL],
-        'Tweets_pro_100k': [urban_pro_100k, rural_pro_100k]
-    }
+        if classification == 'urban':
+            urban_emojis.extend(emojis)
+            urban_tweets += 1
+        elif classification == 'rural':
+            rural_emojis.extend(emojis)
+            rural_tweets += 1
 
-    df = pd.DataFrame(data)
+    print(f"✓ {tweets_with_emojis:,} Tweets mit Emojis")
+    print(f"✓ {urban_tweets:,} Urban Tweets")
+    print(f"✓ {rural_tweets:,} Rural Tweets")
+    print(f"✓ {filtered_modifiers:,} Emoji-Modifier herausgefiltert\n")
 
-    # Erstelle Ausgabeverzeichnis
+    # Counter erstellen
+    urban_counter = Counter(urban_emojis)
+    rural_counter = Counter(rural_emojis)
+
+    # Output-Verzeichnis erstellen
     os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Top Städte analysieren
-    urban_tweets = [tweet for tweet, kat in zip(tweets, kategorien) if kat == 'Urban']
-    urban_orte = [get_city_or_county(tweet) for tweet in urban_tweets]
-    top_urban_orte = Counter(urban_orte).most_common(20)
+    # --- VISUALISIERUNG 1: Side-by-Side Balkendiagramme (Top 15) ---
+    top_15_urban = urban_counter.most_common(15)
+    top_15_rural = rural_counter.most_common(15)
 
-    # TXT-Report erstellen
-    save_txt_report(df, tweets, urban_count, rural_count, unknown_count,
-                    total_classified, urban_pro_100k, rural_pro_100k,
-                    top_urban_orte, output_dir, timestamp)
+    emojis_urban = [emoji for emoji, _ in top_15_urban]
+    counts_urban = [count for _, count in top_15_urban]
 
-    # Visualisierungen erstellen
-    create_visualizations(df, top_urban_orte, output_dir, timestamp)
+    emojis_rural = [emoji for emoji, _ in top_15_rural]
+    counts_rural = [count for _, count in top_15_rural]
 
-    return df
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=('Urban (Städte)', 'Rural (Ländlich)'),
+        horizontal_spacing=0.15
+    )
 
+    # Urban
+    fig.add_trace(
+        go.Bar(
+            x=counts_urban,
+            y=emojis_urban,
+            orientation='h',
+            marker=dict(color='steelblue'),
+            name='Urban',
+            hovertemplate='<b>%{y}</b><br>Anzahl: %{x:,}<extra></extra>'
+        ),
+        row=1, col=1
+    )
 
-def save_txt_report(df, tweets, urban_count, rural_count, unknown_count,
-                    total_classified, urban_pro_100k, rural_pro_100k,
-                    top_urban_orte, output_dir, timestamp):
-    """Speichert TXT-Report"""
+    # Rural
+    fig.add_trace(
+        go.Bar(
+            x=counts_rural,
+            y=emojis_rural,
+            orientation='h',
+            marker=dict(color='forestgreen'),
+            name='Rural',
+            hovertemplate='<b>%{y}</b><br>Anzahl: %{x:,}<extra></extra>'
+        ),
+        row=1, col=2
+    )
 
-    txt_file = os.path.join(output_dir, f"urban_rural_analyse_{timestamp}.txt")
-    with open(txt_file, 'w', encoding='utf-8') as f:
-        f.write("URBAN/RURAL-VERTEILUNG DER CORONA-TWEETS\n")
-        f.write("=" * 80 + "\n\n")
-        f.write(f"Analysezeitpunkt: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"Gesamtzahl Tweets: {len(tweets):,}\n")
-        f.write(f"Klassifizierte Tweets: {total_classified:,} ({total_classified / len(tweets) * 100:.1f}%)\n")
-        f.write(f"Nicht klassifiziert: {unknown_count:,} ({unknown_count / len(tweets) * 100:.1f}%)\n\n")
+    fig.update_xaxes(title_text="Anzahl", row=1, col=1)
+    fig.update_xaxes(title_text="Anzahl", row=1, col=2)
 
-        f.write("=" * 80 + "\n")
-        f.write("DEFINITION\n")
-        f.write("=" * 80 + "\n\n")
-        f.write("Urban: Großstädte mit über 100.000 Einwohnern (n=79)\n")
-        f.write("Rural: Alle anderen Städte und Gemeinden\n")
-        f.write("Stadtstaaten Berlin, Hamburg, Bremen werden immer als Urban klassifiziert\n\n")
+    # WICHTIG: tickfont size=20 für sichtbare Emojis!
+    fig.update_yaxes(autorange="reversed", tickfont=dict(size=20), row=1, col=1)
+    fig.update_yaxes(autorange="reversed", tickfont=dict(size=20), row=1, col=2)
 
-        f.write("=" * 80 + "\n")
-        f.write("ÜBERSICHT URBAN VS. RURAL\n")
-        f.write("=" * 80 + "\n\n")
+    fig.update_layout(
+        title_text='Top 15 Emojis: Urban vs. Rural',
+        showlegend=False,
+        height=700,
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
 
-        f.write(f"{'Kategorie':<15} {'Tweets':<15} {'Anteil':<12} {'Einwohner':<18} {'Tweets/100k EW':<15}\n")
-        f.write("-" * 80 + "\n")
-        f.write(
-            f"{'Urban':<15} {urban_count:<15,} {urban_count / total_classified * 100 if total_classified > 0 else 0:>6.1f}% "
-            f"{EINWOHNER_URBAN:<18,} {urban_pro_100k:>12.1f}\n")
-        f.write(
-            f"{'Rural':<15} {rural_count:<15,} {rural_count / total_classified * 100 if total_classified > 0 else 0:>6.1f}% "
-            f"{EINWOHNER_RURAL:<18,} {rural_pro_100k:>12.1f}\n")
-        f.write("-" * 80 + "\n")
+    html_file1 = os.path.join(output_dir, f"emoji_urban_rural_sidebyside_{timestamp}.html")
+    fig.write_html(html_file1)
+    print(f"✓ Side-by-Side Diagramm: {html_file1}")
+
+    # --- VISUALISIERUNG 2: Direkter Vergleich (Top 10 gemeinsam) ---
+    # Finde die Top 10 Emojis insgesamt
+    all_emojis = urban_emojis + rural_emojis
+    all_counter = Counter(all_emojis)
+    top_10_overall = [emoji for emoji, _ in all_counter.most_common(10)]
+
+    # Zähle für jedes dieser Emojis in Urban und Rural
+    urban_values = [urban_counter.get(emoji, 0) for emoji in top_10_overall]
+    rural_values = [rural_counter.get(emoji, 0) for emoji in top_10_overall]
+
+    fig2 = go.Figure()
+
+    fig2.add_trace(go.Bar(
+        name='Urban',
+        x=top_10_overall,
+        y=urban_values,
+        marker_color='steelblue',
+        text=[f'{v:,}' for v in urban_values],
+        textposition='outside',
+        hovertemplate='<b>%{x}</b><br>Urban: %{y:,}<extra></extra>'
+    ))
+
+    fig2.add_trace(go.Bar(
+        name='Rural',
+        x=top_10_overall,
+        y=rural_values,
+        marker_color='forestgreen',
+        text=[f'{v:,}' for v in rural_values],
+        textposition='outside',
+        hovertemplate='<b>%{x}</b><br>Rural: %{y:,}<extra></extra>'
+    ))
+
+    fig2.update_layout(
+        title='Top 10 Emojis: Urban vs. Rural (Direktvergleich)',
+        xaxis=dict(
+            title='Emoji',
+            tickfont=dict(size=24)  # Große Emojis auf X-Achse!
+        ),
+        yaxis=dict(
+            title='Anzahl Verwendungen'
+        ),
+        barmode='group',
+        height=600,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="right",
+            x=0.99
+        )
+    )
+
+    html_file2 = os.path.join(output_dir, f"emoji_urban_rural_comparison_{timestamp}.html")
+    fig2.write_html(html_file2)
+    print(f"✓ Vergleichsdiagramm: {html_file2}")
+
+    # --- VISUALISIERUNG 3: Prozentuale Anteile (Stacked) ---
+    fig3 = go.Figure()
+
+    total_urban = sum(urban_counter.values())
+    total_rural = sum(rural_counter.values())
+
+    urban_pct = [urban_counter.get(emoji, 0) / total_urban * 100 for emoji in top_10_overall]
+    rural_pct = [rural_counter.get(emoji, 0) / total_rural * 100 for emoji in top_10_overall]
+
+    fig3.add_trace(go.Bar(
+        name='Urban',
+        x=top_10_overall,
+        y=urban_pct,
+        marker_color='steelblue',
+        text=[f'{v:.1f}%' for v in urban_pct],
+        textposition='inside',
+        hovertemplate='<b>%{x}</b><br>Urban: %{y:.1f}%<extra></extra>'
+    ))
+
+    fig3.add_trace(go.Bar(
+        name='Rural',
+        x=top_10_overall,
+        y=rural_pct,
+        marker_color='forestgreen',
+        text=[f'{v:.1f}%' for v in rural_pct],
+        textposition='inside',
+        hovertemplate='<b>%{x}</b><br>Rural: %{y:.1f}%<extra></extra>'
+    ))
+
+    fig3.update_layout(
+        title='Top 10 Emojis: Prozentualer Anteil (Urban vs. Rural)',
+        xaxis=dict(
+            title='Emoji',
+            tickfont=dict(size=24)
+        ),
+        yaxis=dict(
+            title='Anteil (%)'
+        ),
+        barmode='group',
+        height=600,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="right",
+            x=0.99
+        )
+    )
+
+    html_file3 = os.path.join(output_dir, f"emoji_urban_rural_percentage_{timestamp}.html")
+    fig3.write_html(html_file3)
+    print(f"✓ Prozent-Diagramm: {html_file3}")
+
+    # --- VISUALISIERUNG 4: Ratio-Diagramm (Urban/Rural Verhältnis) ---
+    ratios = []
+    emoji_labels = []
+
+    for emoji in top_10_overall:
+        urban_count = urban_counter.get(emoji, 0)
+        rural_count = rural_counter.get(emoji, 0)
 
         if rural_count > 0:
-            f.write(f"Urban/Rural-Ratio (absolut): {urban_count / rural_count:.1f}:1\n")
-        if rural_pro_100k > 0:
-            f.write(f"Urban/Rural-Ratio (pro Kopf): {urban_pro_100k / rural_pro_100k:.1f}:1\n")
+            ratio = urban_count / rural_count
+            ratios.append(ratio)
+            emoji_labels.append(emoji)
 
-        f.write("\n\n" + "=" * 80 + "\n")
-        f.write("TOP 20 STÄDTE (URBAN)\n")
-        f.write("=" * 80 + "\n\n")
+    fig4 = go.Figure()
 
-        f.write(f"{'Rang':<6} {'Stadt':<30} {'Anzahl Tweets':<15}\n")
-        f.write("-" * 80 + "\n")
-        for i, (stadt, count) in enumerate(top_urban_orte, 1):
-            # Übersetze englische Namen ins Deutsche
-            stadt_de = GROSSSTAEDTE_MAPPING.get(stadt, stadt)
-            f.write(f"{i:<6} {stadt_de:<30} {count:>10,}\n")
+    colors_ratio = ['steelblue' if r >= 1 else 'forestgreen' for r in ratios]
 
-        f.write("\n\n" + "=" * 80 + "\n")
-        f.write("INTERPRETATION\n")
-        f.write("=" * 80 + "\n\n")
+    fig4.add_trace(go.Bar(
+        x=emoji_labels,
+        y=ratios,
+        marker_color=colors_ratio,
+        text=[f'{r:.2f}x' for r in ratios],
+        textposition='outside',
+        hovertemplate='<b>%{x}</b><br>Urban/Rural Ratio: %{y:.2f}<extra></extra>'
+    ))
 
-        if rural_pro_100k > 0:
-            f.write(f"Die urbanen Regionen zeigen mit {urban_pro_100k:.1f} Tweets/100k EW eine\n")
+    fig4.add_hline(
+        y=1.0,
+        line_dash="dash",
+        line_color="red",
+        annotation_text="Gleichstand (1:1)",
+        annotation_position="right"
+    )
 
-            if urban_pro_100k > rural_pro_100k:
-                diff_pct = ((urban_pro_100k / rural_pro_100k) - 1) * 100
-                f.write(f"{diff_pct:.0f}% höhere Twitter-Aktivität als ländliche Regionen ")
-                f.write(f"({rural_pro_100k:.1f} Tweets/100k EW).\n\n")
-            else:
-                diff_pct = ((rural_pro_100k / urban_pro_100k) - 1) * 100
-                f.write(f"{diff_pct:.0f}% niedrigere Twitter-Aktivität als ländliche Regionen ")
-                f.write(f"({rural_pro_100k:.1f} Tweets/100k EW).\n\n")
+    fig4.update_layout(
+        title='Urban/Rural Ratio (> 1 = mehr Urban, < 1 = mehr Rural)',
+        xaxis=dict(
+            title='Emoji',
+            tickfont=dict(size=24)
+        ),
+        yaxis=dict(
+            title='Urban/Rural Verhältnis'
+        ),
+        height=600,
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
 
-            f.write("Dies bestätigt die höhere Social-Media-Nutzung in urbanen Zentren,\n")
-            f.write("die durch bessere digitale Infrastruktur, höhere Bevölkerungsdichte\n")
-            f.write("und demografische Faktoren (jünger, höher gebildet) begünstigt wird.\n")
+    html_file4 = os.path.join(output_dir, f"emoji_urban_rural_ratio_{timestamp}.html")
+    fig4.write_html(html_file4)
+    print(f"✓ Ratio-Diagramm: {html_file4}")
 
-    print(f"✓ TXT-Report: {txt_file}")
-
-
-def create_visualizations(df, top_urban_orte, output_dir, timestamp):
-    """Erstellt Visualisierungen: Balkendiagramme"""
-
-    print("\nErstelle Visualisierungen...")
-
-    # Figure mit 1x2 Layout
-    fig = plt.figure(figsize=(16, 8))
-
-    # 1. BALKENDIAGRAMM: Absolute Zahlen Urban vs. Rural
-    ax1 = plt.subplot(1, 2, 1)
-    colors = ['#e74c3c', '#27ae60']  # Urban=Rot, Rural=Grün
-
-    ax1.bar(df['Kategorie'], df['Tweets_absolut'], color=colors, alpha=0.8, edgecolor='black')
-    ax1.set_ylabel('Anzahl Tweets', fontsize=11)
-    ax1.set_title('Tweets: Urban vs. Rural (Absolute Zahlen)', fontsize=13, fontweight='bold')
-    ax1.grid(axis='y', alpha=0.3)
-
-    # Werte auf Balken
-    for i, (kat, val) in enumerate(zip(df['Kategorie'], df['Tweets_absolut'])):
-        ax1.text(i, val + 50, f"{val:,}", ha='center', fontsize=10, fontweight='bold')
-
-    # 2. BALKENDIAGRAMM: Pro 100k Einwohner
-    ax2 = plt.subplot(1, 2, 2)
-
-    ax2.bar(df['Kategorie'], df['Tweets_pro_100k'], color=colors, alpha=0.8, edgecolor='black')
-    ax2.set_ylabel('Tweets pro 100.000 Einwohner', fontsize=11)
-    ax2.set_title('Tweets: Urban vs. Rural (Pro 100k Einwohner)', fontsize=13, fontweight='bold')
-    ax2.grid(axis='y', alpha=0.3)
-
-    # Werte auf Balken
-    for i, (kat, val) in enumerate(zip(df['Kategorie'], df['Tweets_pro_100k'])):
-        ax2.text(i, val + 0.5, f"{val:.1f}", ha='center', fontsize=10, fontweight='bold')
-
-    plt.tight_layout()
-
-    viz_file = os.path.join(output_dir, f"urban_rural_visualisierung_{timestamp}.png")
-    plt.savefig(viz_file, dpi=300, bbox_inches='tight')
-    print(f"✓ Visualisierung gespeichert: {viz_file}")
-
-    plt.close()
-
-    # ZUSÄTZLICH: Top 20 Städte als separates Diagramm
-    if len(top_urban_orte) > 0:
-        fig2, ax = plt.subplots(figsize=(12, 10))
-
-        # Übersetze Stadt-Namen ins Deutsche
-        stadte = [GROSSSTAEDTE_MAPPING.get(stadt, stadt) for stadt, _ in top_urban_orte[:20]]
-        counts = [count for _, count in top_urban_orte[:20]]
-
-        ax.barh(stadte[::-1], counts[::-1], color='#e74c3c', alpha=0.8, edgecolor='black')
-        ax.set_xlabel('Anzahl Tweets', fontsize=11)
-        ax.set_title('Top 20 Städte nach Tweet-Anzahl', fontsize=13, fontweight='bold')
-        ax.grid(axis='x', alpha=0.3)
-
-        plt.tight_layout()
-
-        top_cities_file = os.path.join(output_dir, f"top_20_staedte_{timestamp}.png")
-        plt.savefig(top_cities_file, dpi=300, bbox_inches='tight')
-        print(f"✓ Top 20 Städte gespeichert: {top_cities_file}")
-
-        plt.close()
+    print(f"\n{'=' * 60}")
+    print("URBAN-RURAL VISUALISIERUNGEN ABGESCHLOSSEN!")
+    print(f"{'=' * 60}\n")
+    print(f"Erstellt: 4 interaktive Visualisierungen")
 
 
 def main():
-    # PASSE DIESE PFADE AN!
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
-    output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Urban_Rural"
+    output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Emojis"
 
     tweets = load_tweets(input_file)
-    df = create_urban_rural_analysis(tweets, output_dir)
-
-    print("\n" + "=" * 60)
-    print("ANALYSE ABGESCHLOSSEN!")
-    print("=" * 60)
-    print(f"\nTXT-Report und Visualisierungen wurden erstellt.")
-    print(f"Speicherort: {output_dir}\n")
+    visualize_urban_rural_emojis(tweets, output_dir)
 
 
 if __name__ == "__main__":
