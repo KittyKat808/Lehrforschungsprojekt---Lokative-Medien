@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 def main():
-    # Pfade
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\corona_stopwords.txt"
     spacy_stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\spacy_stopwords_deutsch.txt"
@@ -266,4 +266,5 @@ def main():
 if __name__ == '__main__':
 
     main()
+
 
