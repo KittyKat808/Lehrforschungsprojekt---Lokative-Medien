@@ -66,8 +66,7 @@ class GermanTweetPreprocessor:
         # News-typische Muster entfernen
         text = re.sub(r'(News|Live)-?Ticker\w*|Eilmeldung\w*', '', text, flags=re.IGNORECASE)
 
-        # WICHTIG: Named Entities VOR Bindestrich-Ersetzung zusammenschreiben
-
+        # Named Entities vor Bindestrich-Ersetzung zusammenschreiben
         # Institutionen (alle möglichen Schreibweisen + Genitiv)
         text = re.sub(r'\bRobert[\s-]+Koch[\s-]+Instituts?\b', 'RobertKochInstitut', text, flags=re.IGNORECASE)
         text = re.sub(r'\bRKI\b', 'RobertKochInstitut', text, flags=re.IGNORECASE)
@@ -241,7 +240,7 @@ class GermanTweetPreprocessor:
         print(f"Fertig: {processed} verarbeitet, {skipped} übersprungen")
         return output_file
 
-
+# An eigene Pfade anpassen!
 def main():
     preprocessor = GermanTweetPreprocessor()
     preprocessor.process_dataset(
@@ -252,3 +251,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
