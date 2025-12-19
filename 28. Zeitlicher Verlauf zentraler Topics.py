@@ -14,7 +14,7 @@ def parse_twitter_date(date_str):
 
 
 def main():
-    # Pfade
+    # An eigene Pfade anpassen!
     model_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\LDA\final_14_topics"
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\corona_stopwords.txt"
@@ -370,4 +370,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
