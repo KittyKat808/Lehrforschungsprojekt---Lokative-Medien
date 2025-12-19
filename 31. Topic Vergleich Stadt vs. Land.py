@@ -11,7 +11,7 @@ from gensim.models import LdaModel
 plt.rcParams['font.family'] = 'DejaVu Sans'
 plt.rcParams['axes.unicode_minus'] = False
 
-# Großstädte-Mapping (aus Ihrem Code)
+# Großstädte-Mapping 
 GROSSSTAEDTE_MAPPING = {
     "Berlin": "Berlin", "Hamburg": "Hamburg", "Munich": "München",
     "Cologne": "Köln", "Frankfurt": "Frankfurt am Main",
@@ -247,11 +247,6 @@ def main():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # CSV speichern
-    csv_file = os.path.join(output_dir, f'urban_rural_vergleich_{timestamp}.csv')
-    df_results.to_csv(csv_file, index=False, encoding='utf-8-sig')
-    print(f"✓ CSV gespeichert: {csv_file}")
-
     # TXT-Report
     create_txt_report(df_results, urban_total, rural_total, output_dir, timestamp)
 
@@ -384,4 +379,5 @@ def create_grouped_bar_chart(df_results, output_dir, timestamp):
 
 
 if __name__ == '__main__':
+
     main()
