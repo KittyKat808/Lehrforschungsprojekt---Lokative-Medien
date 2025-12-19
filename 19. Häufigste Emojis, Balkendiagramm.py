@@ -82,7 +82,7 @@ def visualize_top_emojis(tweets, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # --- EINFACHES BALKENDIAGRAMM ---
+    # --- BALKENDIAGRAMM ---
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
@@ -135,6 +135,7 @@ def visualize_top_emojis(tweets, output_dir):
 
 
 def main():
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Emojis"
 
@@ -143,4 +144,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
