@@ -11,7 +11,7 @@ plt.rcParams['axes.unicode_minus'] = False
 
 
 def main():
-    # Pfade
+    # An eigene Pfade anpassen!
     model_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\LDA\final_14_topics"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\LDA\wortwolken"
 
@@ -151,4 +151,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
