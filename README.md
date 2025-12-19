@@ -3,7 +3,7 @@
 
 Dieser Code wurde im Rahmen eines Lehrforschungsprojekts an der TU Berlin erstellt. 
 Zur Erstellung des Codes wurde das Large Language Modell Claude Sonnet 4 und Claude Sonnet 4.5 (Pro-Plan) der Firma Anthropic zur Hilfe genommen. 
-Die Datepfade wurden anonynmierst.
+Die Datepfade wurden anonymisiert.
 Die Dateien sollten nacheinander ausgeführt werden.
 
 Die Ausführung des Codes setzt voraus: 
