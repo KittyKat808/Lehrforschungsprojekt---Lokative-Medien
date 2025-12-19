@@ -227,7 +227,7 @@ def analyze_spatial_emojis(tweets, output_dir, shapefile_path=None):
     os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # --- TXT-REPORT (wie vorher) ---
+    # --- TXT-REPORT ---
     txt_file = os.path.join(output_dir, f"emoji_raeumlich_{timestamp}.txt")
     with open(txt_file, 'w', encoding='utf-8') as f:
         f.write("RÄUMLICHE VERTEILUNG DER EMOJIS\n")
@@ -398,7 +398,7 @@ def analyze_spatial_emojis(tweets, output_dir, shapefile_path=None):
     fig.write_html(html_file)
     print(f"✓ Interaktive Karte: {html_file}")
 
-    # Optional: Als PNG speichern (benötigt kaleido)
+    # Optional: Als PNG speichern 
     try:
         png_file = os.path.join(output_dir, f"emoji_map_{timestamp}.png")
         fig.write_image(png_file, width=1400, height=1000)
@@ -412,6 +412,7 @@ def analyze_spatial_emojis(tweets, output_dir, shapefile_path=None):
 
 
 def main():
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Emojis"
     shapefile_path = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\ne_10m_admin_1_states_provinces\ne_10m_admin_1_states_provinces.shp"
@@ -421,4 +422,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
