@@ -1,2 +1,17 @@
 # Lehrforschungsprojekt---Lokative-Medien
-Zwischen Bayern und Berlin: Regionale Unterschiede der COVID-19-Debatte auf Twitter während der ersten Monate der Pandemie
+"Zwischen Bayern und Berlin: Regionale Unterschiede der COVID-19-Debatte auf Twitter während der ersten Monate der Pandemie"
+
+Dieser Code wurde im Rahmen eines Lehrforschungsprojekts an der TU Berlin erstellt. 
+Zur Erstellung des Codes wurde das Large Language Modell Claude Sonnet 4 und Claude Sonnet 4.5 (Pro-Plan) der Firma Anthropic zur Hilfe genommen. 
+Die Datepfade wurden anonynmierst.
+Die Dateien sollten nacheinander ausgeführt werden.
+
+Die Ausführung des Codes setzt voraus: 
+- Herunterladen des Datensatz GeoCov19 über: IEEE DataPort (2020). GeoCoV19: A Dataset of Hundreds of Millions of Multilingual COVID-19 Tweets with Location Information. https://ieee-dataport.org/open-access/geocov19-dataset-hundreds-millions-multilingual-covid-19-tweets-location-information
+- Twitter Account sowie Twitter Developer Account
+- Twitter API Zugang und Access Codes
+
+
+Informationen zum Datensatz:
+Qazi, U., Imran, M., & Ofli, F. (2020). GeoCoV19: A dataset of hundreds of millions of multilingual COVID-19 tweets with location information. SIGSPATIAL Special, 12(1), S. 6–15. https://doi.org/10.1145/3404820.3404823
+Qazi, U. & Imran, M. (2020). GeoCoV19 Dataset Description. https://crisisnlp.qcri.org/covid_data/geocov19_readme.txt
