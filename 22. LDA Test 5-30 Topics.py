@@ -8,7 +8,7 @@ import os
 
 
 def main():
-    # Pfade
+    # An eigene Pfade anpassen!
     input_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\Cleaned_Data.jsonl"
     stopwords_file = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\corona_stopwords.txt"
     output_dir = r"C:\Users\[NUTZERNAME]\[ORDNERNAME]\LDA"
@@ -76,18 +76,18 @@ def main():
             per_word_topics=True
         )
 
-        # Coherence Score (höher = besser)
+        # Coherence Score 
         coherence_model = CoherenceModel(
             model=lda_model,
             texts=documents,
             dictionary=dictionary,
             coherence='c_v',
-            processes=1  # FIX für Windows: Kein Multiprocessing
+            processes=1  
         )
         coherence_score = coherence_model.get_coherence()
         coherence_scores.append(coherence_score)
 
-        # Perplexity (niedriger = besser, aber weniger aussagekräftig)
+        # Perplexity 
         perplexity = lda_model.log_perplexity(corpus)
         perplexity_scores.append(perplexity)
 
@@ -133,35 +133,7 @@ def main():
     print(f"EMPFEHLUNG: {best_num_topics} Topics (Coherence: {best_coherence:.4f})")
     print("=" * 50)
 
-    # 9. Finales Modell mit bester Konfiguration trainieren
-    print(f"\nTrainiere finales LDA-Modell mit {best_num_topics} Topics...")
-    final_lda = LdaModel(
-        corpus=corpus,
-        id2word=dictionary,
-        num_topics=best_num_topics,
-        random_state=42,
-        passes=15,  # Mehr Passes für finales Modell
-        iterations=400,
-        alpha='auto',
-        eta='auto',
-        per_word_topics=True
-    )
 
-    # 10. Modell speichern
-    final_lda.save(os.path.join(output_dir, 'lda_model'))
-    dictionary.save(os.path.join(output_dir, 'dictionary'))
-    corpora.MmCorpus.serialize(os.path.join(output_dir, 'corpus.mm'), corpus)
-    print(f"Modell gespeichert in: {output_dir}")
-
-    # 11. Topics anzeigen
-    print("\n=== GEFUNDENE TOPICS ===")
-    for idx, topic in final_lda.print_topics(-1, num_words=10):
-        print(f"\nTopic {idx}:")
-        print(topic)
-
-    print("\n✓ Fertig!")
-
-
-# WICHTIG für Windows: Dieser Block ist notwendig!
 if __name__ == '__main__':
+
     main()
